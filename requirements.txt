@@ -7,3 +7,5 @@ sentence-transformers
 faiss-cpu
 pandas
 google-generativeai
+protobuf
+langchain-core

@@ -90,7 +90,7 @@ def retrieve_ve_rerank(soru: str, esik: float) -> list[dict]:
 
 # ── 8. GENERATION — Gemini API Entegrasyonu ────────────────────────────────
 def llm_yanit_uret(soru: str, sonuclar: list[dict], meta_filtre: dict) -> str:
-    """Claude yerine Google Gemini 1.5 Flash kullanır."""
+    """Claude yerine Google Gemini 2.5 Flash kullanır."""
     if not sonuclar: return None
 
     baglam_parcalari = []
@@ -122,8 +122,14 @@ Yanıt:"""
         return f"Gemini API Hatası: {str(e)}"
 
 # ── STREAMLİT ARAYÜZÜ (Görsel kısımlar korunmuştur) ──────────────────────────
-st.set_page_config(page_title="Restoran Gemini RAG", page_icon="🍔", layout="wide")
-st.title("🍔 Restoran Sipariş Botu (Gemini Powered)")
+# --- API KEY OKUMA ---
+api_dosyasi = "GoogleAPIkeys.txt"
+GEMINI_API_KEY = ""
+
+if os.path.exists(api_dosyasi):
+    with open(api_dosyasi, "r", encoding="utf-8") as f:
+        GEMINI_API_KEY = f.read().strip()
+# ---------------------
 
 # (Sidebar ve Mesaj Döngüsü orijinal kodla aynıdır...)
 # [Orijinal kodunuzdaki Sidebar ve Sohbet akışını buraya ekleyebilirsiniz]
@@ -132,6 +138,22 @@ with st.sidebar:
     esik = st.slider("Benzerlik Eşiği", 0.10, 0.95, SIMILARITY_THRESHOLD)
     llm_aktif = st.toggle("Gemini Yanıt Üretimi", value=True)
 
+    st.divider()
+    st.markdown("### 🔑 API Ayarları")
+
+    # value=GEMINI_API_KEY parametresini ekledik
+    yeni_key = st.text_input("Gemini API Key", value=GEMINI_API_KEY, type="password")
+
+    if st.button("Kaydet"):
+        if yeni_key:
+            with open(api_dosyasi, "w", encoding="utf-8") as f:
+                f.write(yeni_key)
+            st.success("API Key başarıyla kaydedildi! Sistem yenileniyor...")
+            st.rerun()
+        else:
+            st.error("Lütfen kutuyu boş bırakmayın!")
+
+genai.configure(api_key=GEMINI_API_KEY)
 if "messages" not in st.session_state: st.session_state.messages = []
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]): st.markdown(msg["content"])
