@@ -216,3 +216,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+# JetBrains IDE'lerinin otomatik olarak oluşturacağı dosyaları engellemek için
+.idea/
+# API Key gizleme
+GoogleAPIkeys.txt
